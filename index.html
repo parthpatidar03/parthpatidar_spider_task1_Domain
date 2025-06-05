@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disc Battle</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Disc Battle</h1>
+            <div class="controls">
+                <button id="reset">New Game</button>
+                <button id="level2-toggle">Enable Level 2 Features</button>
+                <button id="sound-toggle" style="position:fixed;top:10px;right:10px;z-index:1000;">
+    🔇 Click to Enable Sound
+</button>
+                <button id="theme-toggle">🌙 Dark Theme</button>
+            </div>
+        </header>
+
+        <div class="game-info">
+            <div class="score">
+                <span id="score-red">0</span> - <span id="score-yellow">0</span>
+            </div>
+            <div id="message">Player 1's Turn (Red)</div>
+            <div id="timer">30s</div>
+        </div>
+
+        <div id="power-ups" style="display:none">
+            <button id="extra-time">Extra Time (2)</button>
+            <button id="block-column">Block Column (2)</button>
+            <button id="remove-block">Remove Block (2)</button>
+        </div>
+
+        <div id="board" class="board" ></div>
+        <div id="creator">Made with 💖 by Parth</div>
+
+        <div id="blocking-phase" style="display:none">
+            <div id="block-message">Player 2, select column to block for Player 1</div>
+            <div class="column-selectors"></div>
+        </div>
+    </div>
+
+    <!-- Leaderboard Modal -->
+    <div id="leaderboard-modal" class="modal">
+        <div class="modal-content">
+            <h2>Game Over</h2>
+            <p id="game-result-message"></p>
+            <h3>Recent Games</h3>
+            <ul id="leaderboard-list"></ul>
+            <button id="close-modal">Play Again</button>
+        </div>
+    </div>
+    
+    <!-- Replace existing audio elements with these -->
+<audio id="drop-sound" src="./drop-sound.mp3.mp3" preload="auto"></audio>
+<audio id="win-sound" src="./win-sound.mp3.mp3" preload="auto"></audio>
+<audio id="powerup-sound" src="./powerup-sound.mp3.mp3" preload="auto"></audio>
+    <script src="script.js"></script>
+</body>
+</html>
