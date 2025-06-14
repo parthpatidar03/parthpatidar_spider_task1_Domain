@@ -5,19 +5,19 @@ const TIME_LIMIT = 30;
 const POWER_UP_COUNT = 2;
 
 
-let board = Array(ROWS).fill().map(() => Array(COLS).fill(null));
+let board = Array(ROWS).fill().map(() => Array(COLS).fill(null)); //2d array with each rep. the game board.
 let currentPlayer = "Red";
 let blockedColumn = null;
 let gameOver = false;
 
 let scores = { Red: 0, Yellow: 0 };
 let timer = null;
-let audioContextInitialized = false;
+let audioContextInitialized = false;  //ensure audio context is initialized only once.
 
 let timeLeft = TIME_LIMIT;
 let level2Enabled = false;
-let soundEnabled = true;
-let powerUps = {
+let soundEnabled = true; // Flag to toggle sound effects.
+let powerUps = {  // object that tracks the count of each power-up for each player.
     Red: {
         "extra-time": POWER_UP_COUNT,
         "block-column": POWER_UP_COUNT,
@@ -32,7 +32,7 @@ let powerUps = {
 let leaderboard = JSON.parse(localStorage.getItem('discBattleLeaderboard')) || [];
 let isBlockingPhase = false;
 
-
+// *DOM Element References
 const boardElement = document.getElementById("board");
 const messageElement = document.getElementById("message");
 const resetButton = document.getElementById("reset");
@@ -52,6 +52,7 @@ const soundToggle = document.getElementById("sound-toggle");
 
 const themeToggle = document.getElementById("theme-toggle");
 const leaderboardModal = document.getElementById("leaderboard-modal");
+
 const gameResultMessage = document.getElementById("game-result-message");
 const leaderboardList = document.getElementById("leaderboard-list");
 
@@ -60,11 +61,12 @@ const dropSound = document.getElementById("drop-sound");
 
 const winSound = document.getElementById("win-sound");
 const powerupSound = document.getElementById("powerup-sound");
+
 const blockingPhaseElement = document.getElementById("blocking-phase");
 
 //const redPlayer = { name: "Red", score: 0 }; // Player 1 
 const blockMessageElement = document.getElementById("block-message");
-const columnSelectorsElement = document.querySelector(".column-selectors");
+const columnSelectorsElement = document.querySelector(".column-selectors"); //selecting class
 
 
 
@@ -92,7 +94,7 @@ function initGame()
             }
         };
     }
-    
+    // functions called at start of game.
     updateMessage();
     renderBoard();
     updateScores();
@@ -101,7 +103,8 @@ function initGame()
 }
 
 //function updateMessage()
-// Audio initialization
+
+// Audio initialization for browser
 function initAudioContext() {
     if (audioContextInitialized) return;
     
@@ -119,10 +122,11 @@ function initAudioContext() {
 }
 
 // Play sound with safety checks
+// initializes the audio context if needed, resets the sound to the start, and plays it.
+// Catches and logs any errors.
 function playSound(soundElement) {
     if (!soundEnabled) return;
     
-
 try {
         initAudioContext();
         soundElement.currentTime = 0;
@@ -130,7 +134,7 @@ try {
     } catch (e) {
         console.error("Playback failed:", e);
     }
-}
+}``
 
 
 
@@ -144,10 +148,11 @@ function updateScores() {
 function updateMessage() {
     const playerNum = currentPlayer === "Red" ? "1" : "2";
     let message = `Player ${playerNum}'s Turn (${currentPlayer})`;
-    if (blockedColumn !== null) message += ` | Column ${blockedColumn + 1} blocked`;
+    if (blockedColumn !== null) message += ` | Column ${blockedColumn + 1} blocked`; // if blocked col. is not null
     messageElement.textContent = message;
 }
 
+// Handels all board work, resets it 
 function renderBoard() {
     boardElement.innerHTML = "";
     
@@ -166,12 +171,12 @@ function renderBoard() {
     for (let row = 0; row < ROWS; row++) {
         for (let col = 0; col < COLS; col++) {
             const cell = document.createElement("div");
-            cell.classList.add("cell");
+            cell.classList.add("cell"); // adds cell class to each div
             if (board[row][col]) cell.classList.add(board[row][col].toLowerCase());
             if (col === blockedColumn) cell.classList.add("blocked");
             cell.dataset.row = row;
             cell.dataset.col = col;
-            cell.addEventListener("click", () => handleCellClick(col));
+            cell.addEventListener("click", () => handleCellClick(col)); // add click event
             boardElement.appendChild(cell);
         }
     }
@@ -182,7 +187,7 @@ function renderBoard() {
 function handleCellClick(col) {
     if (gameOver || isBlockingPhase || col === blockedColumn) return;
     
-    const row = getLowestEmptyRow(col);
+    const row = getLowestEmptyRow(col); //gets the lowest row, defined later
     if (row === -1) return;
     
     playSound(dropSound);
@@ -201,33 +206,33 @@ function handleCellClick(col) {
         return;
     }
     
-    switchPlayer();
+    switchPlayer(); //If win or draw, ends the game. Otherwise, switches players.
     renderBoard();
 }
 
+// to find lowest row.
 function getLowestEmptyRow(col) {
-    for (let row = ROWS - 1; row >= 0; row--) {
+    for (let row = ROWS - 1; row >= 0; row--) { //  Iterates from the bottom of the column upwards and returns the first empty row
         if (!board[row][col]) return row;
     }
-    return -1;
+    return -1; //Returns -1 if the column is full.
 }
 
+//checking win aftre the move prev i made
 function checkWin(row, col) {
     const directions = [
-        [0, 1], [1, 0], [1, 1], [1, -1]
+        [0, 1], [1, 0], [1, 1], [1, -1]// hori,verti, two diagonal
     ];
-
-
 
     for (const [dr, dc] of directions) {
         let count = 1;
-        count += countDirection(row, col, dr, dc);
+        count += countDirection(row, col, dr, dc);// decleared later
         count += countDirection(row, col, -dr, -dc);
         if (count >= 4) return true;
     }
     return false;
 }
-
+ //  Counts consecutive discs in one direction.
 function countDirection(row, col, dr, dc) {
     let count = 0;
     let r = row + dr;
@@ -247,17 +252,20 @@ function checkDraw() {
 
 function switchPlayer() {
     clearInterval(timer);
-    timeLeft = TIME_LIMIT;
+    timeLeft = TIME_LIMIT;// resets the timer
     timerElement.textContent = `${timeLeft}s`;
-    timerElement.classList.remove("warning");
-    currentPlayer = currentPlayer === "Red" ? "Yellow" : "Red";
+    timerElement.classList.remove("warning"); //remove warning class from css
+    currentPlayer = currentPlayer === "Red" ? "Yellow" : "Red";//  Changes `currentPlayer` to the opponent.
     startBlockingPhase();
 }
 
-function startBlockingPhase() {
+
+function startBlockingPhase() // allows the current player to block oppo.
+{
     isBlockingPhase = true;
+    // currentPlayer is getting blocked
     const blockingPlayer = currentPlayer === "Red" ? "Yellow" : "Red";
-    const playerNum = blockingPlayer === "Red" ? "1" : "2";
+    const playerNum = blockingPlayer === "Red" ? "1" : "2"; // player who selects block col.
     
     blockMessageElement.textContent = `Player ${playerNum}, select column to block for Player ${currentPlayer === "Red" ? "1" : "2"}`;
     blockingPhaseElement.style.display = "block";
@@ -266,7 +274,7 @@ function startBlockingPhase() {
     for (let col = 0; col < COLS; col++) {
         const button = document.createElement("button");
         button.className = "column-btn";
-        if (col === blockedColumn || board[0][col] !== null) {
+        if (board[0][col] !== null) {
             button.classList.add("blocked");
             button.disabled = true;
         }
@@ -278,7 +286,7 @@ function startBlockingPhase() {
     }
 }
 
-function selectBlockColumn(col) {
+function selectBlockColumn(col) { // Sets the blocked column and exits the blocking phase.
     blockedColumn = col;
     isBlockingPhase = false;
     blockingPhaseElement.style.display = "none";
@@ -300,19 +308,19 @@ function startTimer()
         timeLeft--;
         timerElement.textContent = `${timeLeft}s`;
         
-        if (timeLeft <= 10) timerElement.classList.add("warning");
+        if (timeLeft <= 10) timerElement.classList.add("warning"); //blinking starts for timwer less than 10
         if (timeLeft <= 0) {
             clearInterval(timer);
             const opponent = currentPlayer === "Red" ? "Yellow" : "Red";
-            endGame(`Time's up! Player ${opponent === "Red" ? "1" : "2"} wins!`, opponent);
+            endGame(`Time's up! Player ${opponent === "Red" ? "1" : "2"} wins!🥇`, opponent); // selects the opponent's opponent menas player who plyed just before
             scores[opponent]++;
         }
-    }, 1000);
+    }, 1000); // 1sec interval
 }
 
 
 
-function endGame(message, winner) {
+function endGame(message, winner) { // Ends the game and updates the leaderboard.
     gameOver = true;
 
     clearInterval(timer);
@@ -347,7 +355,7 @@ function showLeaderboard()
         const winnerText = result.winner === "Draw" ? "Draw" : 
                          result.winner === "Red" ? "Player 1 (Red)" : "Player 2 (Yellow)";
         li.innerHTML = `<span>${result.date}</span><span>${winnerText}</span>`;
-        leaderboardList.appendChild(li);
+        leaderboardList.appendChild(li); // Add this list in the leaderboard
     });
     
     leaderboardModal.style.display = "flex";
